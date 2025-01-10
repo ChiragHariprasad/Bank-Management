@@ -1,132 +1,135 @@
-# Bank Account Management System
+# Bank Server Application
 
-A console-based banking system implementation in C that provides basic banking operations and account management functionality. This system is designed to run on Windows systems and provides a user-friendly interface for managing bank accounts and transactions.
+This project implements a simple server application in C that simulates a banking system. The server handles client requests for login, balance inquiry, and money transfer through a TCP connection.
 
 ## Features
 
-- Account Creation and Management
-  - Create new bank accounts with detailed user information
-  - Secure password-protected accounts
-  - Support for multiple account types (savings/current)
+1. **User Authentication**:
+   - Validates user credentials from a file (`username.txt`).
 
-- Banking Operations
-  - Check account balance with transaction history
-  - Transfer money between accounts
-  - View detailed account information
-  - Secure login/logout functionality
+2. **Balance Inquiry**:
+   - Fetches the total balance and transaction details for a given user from a file (`mon.txt`).
 
-- User Interface
-  - Clean console-based menu system
-  - Password masking for security
-  - Interactive loading animations
-  - Clear screen transitions
+3. **Money Transfer**:
+   - Facilitates transferring money between users and updates the transaction records in `mon.txt`.
+
+## Files Used
+
+1. `username.txt`:
+   - Stores user information such as username, password, and personal details.
+   - Structure: `struct pass`.
+
+2. `mon.txt`:
+   - Records money transfer transactions.
+   - Structure: `struct money`.
 
 ## Prerequisites
 
-- Windows operating system
-- C compiler (recommended: GCC)
-- Basic development tools:
-  - Make (optional)
-  - Text editor or IDE
-  - Git (for version control)
+- **Windows Operating System** (uses Winsock API).
+- Microsoft Visual Studio or any compatible C compiler.
+- `Ws2_32.lib` for Winsock functionality.
 
-## Installation
+## Compilation
 
-1. Clone or download the source code:
-```bash
-git clone <repository-url>
-```
-
-2. Navigate to the project directory:
-```bash
-cd bank-account-system
-```
-
-3. Compile the source code:
-```bash
-gcc -o bank_system main.c -lwinmm
-```
+Ensure the `Ws2_32.lib` library is linked during compilation. If using GCC, this is automatically handled by the `#pragma comment(lib, "ws2_32.lib")` directive.
 
 ## Usage
 
-1. Run the compiled executable:
-```bash
-./bank_system
+1. **Start the Server**:
+   - Compile and run the server application.
+   - The server listens on port `8080`.
+
+2. **Client Requests**:
+   - Send JSON-formatted requests to the server using a TCP client (e.g., Postman, netcat, or a custom client).
+
+### Example Requests
+
+#### Login
+```json
+{
+  "action": "login",
+  "username": "user1",
+  "password": "password1"
+}
 ```
 
-2. The main menu provides three options:
-   - Create a bank account
-   - Sign in to existing account
-   - Exit
+#### Check Balance
+```json
+{
+  "action": "check_balance",
+  "username": "user1"
+}
+```
 
-### Creating a New Account
+#### Transfer Money
+```json
+{
+  "action": "transfer",
+  "from_user": "user1",
+  "to_user": "user2",
+  "amount": 5000
+}
+```
 
-1. Select option 1 from the main menu
-2. Enter the following information:
-   - First and last name
-   - Father's and mother's name
-   - Address
-   - Account type (savings/current)
-   - Date of birth
-   - Aadhar number
-   - Phone number
-   - Username (max 50 characters)
-   - Password (max 50 characters)
+### Example Responses
 
-### Logging In
+#### Login
+```json
+{"success": true}
+```
 
-1. Select option 2 from the main menu
-2. Enter your username and password
-3. After successful login, you can:
-   - Check balance
-   - Transfer money
-   - View account information
-   - Logout
-   - Exit
+#### Check Balance
+```json
+{
+  "transactions": [
+    {"from": "user2", "amount": 1000},
+    {"from": "user3", "amount": 2000}
+  ],
+  "total_balance": 3000
+}
+```
 
-### Transferring Money
+#### Transfer Money
+```json
+{"success": true}
+```
 
-1. Login to your account
-2. Select the "Transfer Money" option
-3. Enter:
-   - Your username (sender)
-   - Recipient's username
-   - Amount to transfer
+## Debugging
 
-### Checking Balance
+To debug server responses, the application logs outgoing responses in the console. These logs can help verify the JSON being sent to clients.
 
-1. Login to your account
-2. Select "Check Balance"
-3. View:
-   - Transaction history
-   - Total balance
-   - Transaction details
+Example:
+```
+Sending response: {"success": true}
+```
 
-## File Structure
+## Error Handling
 
-The system uses two main files for data storage:
-- `username.txt`: Stores user account information
-- `mon.txt`: Stores transaction records
+- If files (`username.txt` or `mon.txt`) are missing, the server gracefully handles errors by returning appropriate JSON responses:
 
-## Security Features
+  ```json
+  {"error": "Error opening file"}
+  ```
 
-- Password masking during input
-- Secure file-based data storage
-- Input validation and buffer overflow prevention
-- Session management
-- Protected account access
+- Invalid usernames or transactions are flagged with a failure response:
 
-## Technical Details
-
-- Written in C
-- Uses Windows API for console manipulation
-- Binary file operations for data persistence
-- Structured programming approach with separate functions for different operations
+  ```json
+  {"success": false}
+  ```
 
 ## Limitations
 
-- Windows-only compatibility
-- Console-based interface
-- No encryption for stored data
-- Limited concurrent user support
-- No database integration
+1. No encryption for sensitive data (e.g., passwords).
+2. Simple JSON handling using `sscanf` and string functions instead of a robust JSON parser.
+3. Designed for demonstration purposes; lacks advanced error recovery.
+
+## Future Improvements
+
+- Integrate a proper JSON library (e.g., cJSON) for improved request/response handling.
+- Add secure password storage (e.g., hashing).
+- Implement multi-threading for handling multiple client connections.
+- Extend functionality with more banking features.
+
+## Author
+
+This project is a simplified demonstration of a bank server application written in C using the Winsock API for networking. It is intended for educational purposes.
